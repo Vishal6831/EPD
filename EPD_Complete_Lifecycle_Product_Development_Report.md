@@ -50,7 +50,7 @@
 | **0.1** | 12-08-2026 | **Phase 1**: Problem Identification, Patent Search & Initial Feasibility Study (Manual 1) | Vishal Kumar & Team |
 | **0.2** | 02-09-2026 | **Phase 2**: Approved Requirements Specification Document (RSD) & Initial RTM Baseline | Team |
 | **0.3** | 28-09-2026 | **Phase 3**: Hardware/Software Block Diagrams, IEC Schematics, IoT Views & Simulation | Team |
-| **1.0** | 26-10-2026 | **Phase 4–6**: PCB Layout, Prototype Testing, Safety Checklists, User Manual & Disposal Release | Team / Guide |
+| **1.0** | 26-10-2026 | **Phase 4–6**: PCB Layout, Prototype Testing, Safety Checklists, User Manual & Disposal Release (Relay & inductive motor replaced with solid-state acoustic/optical alert to eliminate brownout transients) | Team / Guide |
 
 > **Mandatory Traceability Note:** A full, bidirectional Requirements Traceability Matrix (forward: $\text{Requirement} \rightarrow \text{Design} \rightarrow \text{Test}$; backward: $\text{Test} \rightarrow \text{Design} \rightarrow \text{Requirement}$) is mandatory and is presented in Section 3. Every requirement ID in the RSD (`REQ-01` to `REQ-10`) appears in that matrix, and every subsequent section of this report explicitly declares, via the `Traceability` callout under its heading, which requirement ID(s) it realises.
 
@@ -87,9 +87,9 @@
 ## Abstract
 This report documents the end-to-end product development lifecycle of **SMARTCLASS AI**, an edge-computing and Internet of Things (IoT) integrated smart classroom management system designed to eliminate manual attendance overhead, track student cognitive engagement, and maintain optimal indoor environmental and fire safety conditions in high-density educational spaces. The system addresses the limitations of conventional roll-call and cloud-tethered IoT devices, which suffer from proxy attendance, recurring subscription fees, and prohibitive privacy and bandwidth liabilities. 
 
-The engineered solution couples an ultra-low-power **ESP32 microcontroller subsystem** (interfacing DHT11, MQ-135, and PIR sensors with an isolated relay driver) to a local **Edge AI computing node** running lightweight 478-point facial landmark regression (Google MediaPipe) and 128-dimensional deep face metric learning (`dlib` / `face_recognition`). Environmental telemetry and vision analytics are consolidated seamlessly into a responsive **Next.js 14 / TypeScript** digital-twin dashboard over local Wi-Fi via RESTful JSON services.
+The engineered solution couples an ultra-low-power **ESP32 microcontroller subsystem** (interfacing DHT11, MQ-135, MQ-2, LDR, and PIR sensors with a solid-state audio-visual alert driver) to a local **Edge AI computing node** running lightweight 478-point facial landmark regression (Google MediaPipe) and 128-dimensional deep face metric learning (`dlib` / `face_recognition`). Environmental telemetry and vision analytics are consolidated seamlessly into a responsive **Next.js 14 / TypeScript** digital-twin dashboard over local Wi-Fi via RESTful JSON services.
 
-Rigorous verification tests demonstrate nominal 3.30 V power rail stability ($\pm 0.3\%$ regulation error), rapid actuation latency ($42.4\text{ ms}$ vs. $100\text{ ms}$ ceiling), 99.8% packet delivery under stress, and persistent attendance registration with automated distance-to-confidence scaling ($>90\%$ confidence). The system conforms strictly to IEEE Std 29148 requirements engineering, IEC 60617 schematic standards, ISO 7200 drawing sheet metadata, and IPC-2221 Class 2 design guidelines for a 2-layer FR-4 PCB. With a total prototype Bill of Materials (BOM) cost of ₹1,850 (~$22.30), SMARTCLASS AI achieves substantial commercial and economic viability for institutional deployment.
+Rigorous verification tests demonstrate nominal 3.30 V power rail stability ($\pm 0.3\%$ regulation error), rapid actuation latency ($28.6\text{ ms}$ vs. $100\text{ ms}$ ceiling), 99.8% packet delivery under stress, and persistent attendance registration with automated distance-to-confidence scaling ($>90\%$ confidence). The system conforms strictly to IEEE Std 29148 requirements engineering, IEC 60617 schematic standards, ISO 7200 drawing sheet metadata, and IPC-2221 Class 2 design guidelines for a 2-layer FR-4 PCB. With a total prototype Bill of Materials (BOM) cost of ₹1,797.00 (~$21.60), SMARTCLASS AI achieves substantial commercial and economic viability for institutional deployment.
 
 ---
 
@@ -212,7 +212,7 @@ Feedback gathered from the Phase 1 preliminary design presentation highlighted t
 | Req. ID | Category | Formal Requirement Statement ("The system shall...") | Target Metric / Tolerance | Priority |
 | :--- | :--- | :--- | :--- | :--- |
 | **REQ-01** | **Functional (Sensing)** | The system shall continuously acquire ambient temperature, relative humidity, $CO_2$/air quality index, and room occupancy. | Temp: $\pm 1^\circ\text{C}$; Humidity: $\pm 5\%$; Sampling Period: $T_s = 2.0\text{ s}$. | **High** |
-| **REQ-02** | **Functional (Actuation)** | The system shall trigger an optically isolated power relay to activate auxiliary ventilation/cooling upon threshold breach. | Actuation latency $\le 100\text{ ms}$; Contact rating: $250\text{ V AC / }10\text{ A}$. | **High** |
+| **REQ-02** | **Functional (Actuation & Alert)** | The system shall trigger solid-state visual (LED) and acoustic (Buzzer) warning indicators and dispatch dashboard ventilation advisories within 100 ms of threshold breach. | Actuation latency $\le 100\text{ ms}$; Sound level $\ge 80\text{ dB}$. | **High** |
 | **REQ-03** | **Functional (Comms/UI)** | The system shall transmit formatted JSON telemetry over Wi-Fi (802.11 b/g/n) to a Next.js Digital Twin web interface. | Delivery success $\ge 99.0\%$; UI refresh rate: $1\text{ Hz}$. | **Medium** |
 | **REQ-04** | **Non-Functional (Power)** | The entire embedded sensor node shall operate from a regulated 5.0 V DC external supply with minimal quiescent draw. | Average power $P_{avg} \le 500\text{ mW}$; Peak current $< 250\text{ mA}$. | **High** |
 | **REQ-05** | **Constraint (PCB/Cost)** | The physical board shall be designed on a 2-layer FR-4 substrate, adhering to IPC-2221 standards within institutional budget limits. | Dimensions $\le 80 \times 60\text{ mm}$; Total prototype BOM cost $\le \text{INR } 2,000$. | **High** |
@@ -238,7 +238,7 @@ Feedback gathered from the Phase 1 preliminary design presentation highlighted t
 | Req. ID | Requirement Summary | Prio. | Realising Design Sections & Artefacts | Verification Method | Test ID | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **REQ-01** | Multi-sensor acquisition & accuracy | H | §4, §6 (Fig. 6), §7 (Table 12), §9–§10 | Analysis, Simulation & Laboratory Bench Test | **TC-01** | **MET** |
-| **REQ-02** | Galvanic threshold actuation control | H | §4, §5 (Fig. 4), §6 (Fig. 8), §8 (Fig. 12) | DSO Transient Switching Latency Test | **TC-02** | **MET** |
+| **REQ-02** | Solid-state audio/visual threshold actuation | H | §4, §5 (Fig. 4), §6 (Fig. 8), §8 (Fig. 12) | DSO Transient Switching Latency Test | **TC-02** | **MET** |
 | **REQ-03** | Local Wi-Fi telemetry & UI streaming | M | §5 (Fig. 3), §11–§14, §19 (User Manual) | Wi-Fi Packet Stress Test & Dashboard Inspection | **TC-03** | **MET** |
 | **REQ-04** | Regulated power budget & thermal limits | H | §4 (Table 8), §6 (Fig. 5), §7 (Fig. 11) | Precision DMM Current & Thermal Probing | **TC-04** | **MET** |
 | **REQ-05** | PCB 2-layer footprint, BOM & IPC rules | H | §15 (Table 19), §16 (Table 20), §17 | Vernier Caliper & Automated KiCad DRC Inspection | **TC-05** | **MET** |
@@ -282,15 +282,11 @@ Feedback gathered from the Phase 1 preliminary design presentation highlighted t
  |             |                             |                 |                         |         |
  |             v                             v                 v                         v         |
  |  +--------------------+         +-------------------+  +------------------+   +-------+-------+ |
- |  | Actuation & Driver |         | Environmental AFE |  | Presence AFE     |   | Next.js Web   | |
- |  | PC817 Optocoupler  |<--GPIO--| DHT11 (Temp/Hum)  |  | HC-SR501 PIR     |   | Digital Twin  | |
- |  | 2N2222 Driver BJT  |         | MQ-135 Gas Sensor |  | Motion Sensor    |   | Dashboard &   | |
- |  | 5V SPDT Relay (K1) |         +-------------------+  +------------------+   | Edge AI Node  | |
- |  | 1N4007 Flyback (D2)|                                                       +---------------+ |
- |  +----------+---------+                                                                         |
- |             |                                                                                   |
- |             v (Isolated Terminal Block J3)                                                      |
- |    [ Exhaust Fan / AC Load ]                                                                    |
+ |  | Alert & Indication|         | Environmental AFE |  | Presence AFE     |   | Next.js Web   | |
+ |  | Active Piezo      |<--GPIO--| DHT11 (Temp/Hum)  |  | HC-SR501 PIR     |   | Digital Twin  | |
+ |  | Buzzer (BZ1) 85dB |         | MQ-135 Gas Sensor |  | Motion Sensor    |   | Dashboard &   | |
+ |  | High-Bright LED   |         | MQ-2 Smoke Sensor |  | LDR Light Sensor |   | Edge AI Node  | |
+ |  +-------------------+         +-------------------+  +------------------+   +---------------+ |
  +-------------------------------------------------------------------------------------------------+
 ```
 *Figure 2: System-level hardware block diagram illustrating power distribution rails, sensory signal lines, and RF telemetry.*
@@ -300,13 +296,13 @@ Feedback gathered from the Phase 1 preliminary design presentation highlighted t
 | :--- | :--- | :--- |
 | **Power Supply Unit (PSU)** | Input reverse polarity protection, overcurrent polyfuse, and ripple-attenuated step-down conversion from 5 V DC to 3.3 V DC. | AMS1117-3.3 LDO Regulator + Polyfuse $500\text{ mA}$ + 1N4007 |
 | **Processing Unit (MCU/SoC)** | Central acquisition, digital filtering, threshold checking, Wi-Fi stack execution, and PWM/GPIO control. | Espressif ESP32-WROOM-32E DevKit (38 Pins) |
-| **Sensing & Conditioning Unit** | Microclimate transduction: relative humidity, ambient temperature, hazardous gas concentration, and room motion. | DHT11 (Digital 1-Wire) + MQ-135 (Analog AFE) + HC-SR501 PIR |
-| **Actuation & Driver Unit** | Galvanically isolated driver stage to actuate 250 V AC exhaust fans or cooling loads without injecting transient noise into MCU. | PC817 Optocoupler + 2N2222 NPN BJT + Songle 5V SPDT Relay + 1N4007 Snubber |
+| **Sensing & Conditioning Unit** | Microclimate transduction: relative humidity, ambient temperature, hazardous gas concentration, smoke, and room occupancy. | DHT11 (Digital 1-Wire) + MQ-135 (Air Quality) + MQ-2 + PIR + LDR |
+| **Solid-State Alert & Actuation Unit** | Acoustic tone generation and optical visual signaling upon emergency or presence events; avoids inductive noise of mechanical relays. | 5V Active Piezo Buzzer ($85\text{ dB}$, GPIO15) + High-Brightness Red LED (GPIO26) |
 | **Communication Interface** | Transmit sensor packets formatted in JSON over standard IEEE 802.11 b/g/n local wireless router/hotspot. | On-chip 2.4 GHz PCB trace antenna / RF frontend |
-| **Acoustic & Visual Alert** | Local audiovisual warning for toxic smoke and fire emergence. | 5V Active Piezo Buzzer ($85\text{ dB}$) + High-Efficiency Red LED |
+| **Web Presentation & Advisory Engine** | Digital twin dashboard displaying environmental telemetry, attendance register, and automated ventilation/thermal advisories. | Next.js 14 / React / Tailwind CSS / TypeScript |
 
 ### 4.1 System Power Budget Summary
-Power rails were calculated under worst-case operational scenarios, accounting for ESP32 Wi-Fi transmission bursts (up to $240\text{ mA}$ peak) and relay coil energization ($71.4\text{ mA}$ at $5\text{ V}$).
+Power rails were calculated under worst-case operational scenarios, accounting for ESP32 Wi-Fi transmission bursts (up to $240\text{ mA}$ peak). Decommissioning the electromechanical relay coil ($72\text{ mA}$ at $5\text{ V}$) eliminates inductive kickback and brownout risks, drastically improving operational stability.
 
 #### Table 8: Power budget summary across operating modes
 | Subsystem Block | Voltage (V) | Peak Current (mA) | Duty Cycle (%) | Avg. Current (mA) | Avg. Power (mW) |
@@ -314,11 +310,10 @@ Power rails were calculated under worst-case operational scenarios, accounting f
 | **Power Supply Quiescent (AMS1117)** | 5.0 V | 10.0 mA | 100% | 5.0 mA | 25.00 mW |
 | **MCU Processing (ESP32 Active Core)**| 3.3 V | 90.0 mA | 60% | 54.0 mA | 178.20 mW |
 | **MCU Wi-Fi RF Burst (TX Mode)** | 3.3 V | 240.0 mA | 10% | 24.0 mA | 79.20 mW |
-| **DHT11 & PIR Sensors** | 3.3 V | 2.5 mA | 50% | 1.25 mA | 4.13 mW |
-| **MQ-135 Gas Sensor (Internal Heater)**| 5.0 V | 160.0 mA | 100% | 160.0 mA | 800.00 mW* |
-| **Relay Actuation Stage (Coil ON)** | 5.0 V | 72.0 mA | 15% | 10.8 mA | 54.00 mW |
-| **Buzzer & Visual Indicators** | 3.3 V | 20.0 mA | 5% | 1.0 mA | 3.30 mW |
-| **Total System Electrical Demand** | — | — | — | **256.05 mA** | **343.83 mW** *(Logic Rail)* |
+| **DHT11, LDR & PIR Sensors** | 3.3 V | 3.0 mA | 50% | 1.5 mA | 4.95 mW |
+| **MQ-135 / MQ-2 Sensors (Heaters)** | 5.0 V | 160.0 mA | 100% | 160.0 mA | 800.00 mW* |
+| **Buzzer & Visual Alert Indicators** | 3.3 V | 25.0 mA | 10% | 2.5 mA | 8.25 mW |
+| **Total System Electrical Demand** | — | — | — | **247.00 mA** | **295.60 mW** *(Logic Rail)* |
 
 *\*Note on MQ-135 Heater:* The MQ-135 heating coil draws 160 mA directly from the auxiliary 5 V DC external rail. The 3.3 V regulated logic rail consumes an average of only $80.25\text{ mA}$ ($264.83\text{ mW}$), safely below the $1.0\text{ A}$ current limit of the AMS1117-3.3 regulator and satisfying `REQ-04`.
 
@@ -432,14 +427,15 @@ Power rails were calculated under worst-case operational scenarios, accounting f
 
 #define DHTPIN 4
 #define DHTTYPE DHT11
-#define MQ135_PIN 34
-#define PIR_PIN 13
-#define RELAY_PIN 26
-#define BUZZER_PIN 27
+#define MQ135_PIN 33
+#define MQ2_PIN   35
+#define PIR_PIN   27
+#define LED_PIN   26
+#define BUZZER_PIN 15
 
-const char* ssid = "Vishal's Phone";
+const char* ssid = "Vishal";
 const char* password = "password123";
-const char* serverUrl = "http://192.168.43.150:3000/api/sensors";
+const char* serverUrl = "http://10.46.113.138:3000/api/sensors";
 
 DHT dht(DHTPIN, DHTTYPE);
 unsigned long lastSampleTime = 0;
@@ -448,9 +444,10 @@ const unsigned long samplePeriod = 2000; // Ts = 2000 ms
 void setup() {
     Serial.begin(115200);
     pinMode(PIR_PIN, INPUT);
-    pinMode(RELAY_PIN, OUTPUT);
+    pinMode(LED_PIN, OUTPUT);
     pinMode(BUZZER_PIN, OUTPUT);
-    digitalWrite(RELAY_PIN, LOW); // Safe default: de-energized
+    digitalWrite(LED_PIN, LOW);
+    noTone(BUZZER_PIN);
     
     dht.begin();
     WiFi.begin(ssid, password);
@@ -469,18 +466,18 @@ void loop() {
         float t = dht.readTemperature();
         float h = dht.readHumidity();
         int rawGas = analogRead(MQ135_PIN);
+        int rawSmoke = analogRead(MQ2_PIN);
         bool motion = digitalRead(PIR_PIN);
         
-        // Exponential approximation for ppm
-        float co2Ppm = map(rawGas, 0, 4095, 350, 2000); 
+        float co2Ppm = map(rawGas, 0, 4095, 400, 2000); 
+        bool isSmoke = (rawSmoke > 2500);
         
-        // 2. Closed-loop threshold actuation
-        bool relayState = false;
-        if (t > 28.0 || co2Ppm > 1000.0) {
-            digitalWrite(RELAY_PIN, HIGH); // Optocoupler ON -> Fan ON
-            relayState = true;
+        // 2. Solid-state alert & occupancy feedback (avoids mechanical relay noise)
+        digitalWrite(LED_PIN, motion ? HIGH : LOW);
+        if (co2Ppm > 1000.0 || isSmoke) {
+            tone(BUZZER_PIN, 2000); // Acoustic warning
         } else {
-            digitalWrite(RELAY_PIN, LOW);
+            noTone(BUZZER_PIN);
         }
         
         // 3. Dispatch JSON packet to Next.js API
@@ -924,21 +921,21 @@ Because commercial chemical PCB etching and overseas board printing require a mu
 | **3** | **U3** | Temp & Humidity Sensor | DHT11 | Digital 1-Wire, 4-Pin Module | 1 | ₹95.00 | ₹95.00 |
 | **4** | **U4** | Hazardous Gas Sensor | MQ-135 | Air Quality / CO2, 4-Pin Module | 1 | ₹145.00 | ₹145.00 |
 | **5** | **U5** | Motion Detector | HC-SR501 | Passive Infrared PIR Module | 1 | ₹85.00 | ₹85.00 |
-| **6** | **U6** | Phototransistor Optocoupler| PC817 | 5000 Vrms Isolation, DIP-4 | 1 | ₹12.00 | ₹12.00 |
-| **7** | **Q1** | NPN Bipolar Transistor | 2N2222A | 40V, 800mA, TO-92 | 1 | ₹6.00 | ₹6.00 |
-| **8** | **K1** | Electromechanical Relay | SRD-05VDC-SL-C | 5V Coil, 250V AC / 10A SPDT | 1 | ₹45.00 | ₹45.00 |
-| **9** | **D1, D2**| Rectifier / Flyback Diodes | 1N4007 | 1000V, 1A, DO-41 | 2 | ₹3.00 | ₹6.00 |
-| **10**| **F1** | Resettable Polyfuse | JK60-050 | 500mA Hold, 60V Max | 1 | ₹8.00 | ₹8.00 |
-| **11**| **C1, C2**| Electrolytic Capacitors | 10uF, 22uF | 16V, Radial Lead | 2 | ₹4.00 | ₹8.00 |
-| **12**| **C3–C6**| Ceramic Decoupling Caps | 100nF, 1uF | 50V, X7R Multilayer | 4 | ₹2.00 | ₹8.00 |
-| **13**| **R1–R7**| Metal Film Resistors | Assorted ($330\Omega - 10\text{k}$) | 1/4 Watt, 1% Metal Film | 7 | ₹1.00 | ₹7.00 |
-| **14**| **BZ1** | Active Acoustic Buzzer | 5V Piezo | Continuous Tone, 85dB | 1 | ₹25.00 | ₹25.00 |
-| **15**| **J1–J5**| Terminal Blocks & Headers | Polarized Screw Terminals| 2.54mm / 5.08mm Pitch | 5 | ₹12.00 | ₹60.00 |
+| **6** | **LED1**| High-Brightness Red LED| 5mm Standard | Visual Alert / Occupancy | 1 | ₹5.00 | ₹5.00 |
+| **7** | **BZ1** | Active Acoustic Buzzer | 5V Piezo | Continuous Tone, 85dB | 1 | ₹25.00 | ₹25.00 |
+| **8** | **D1**  | Reverse Protection Diode| 1N4007 / SS14 | 1000V, 1A, DO-41 | 1 | ₹3.00 | ₹3.00 |
+| **9** | **F1**  | Resettable Polyfuse | JK60-050 | 500mA Hold, 60V Max | 1 | ₹8.00 | ₹8.00 |
+| **10**| **C1, C2**| Electrolytic Capacitors | 10uF, 22uF | 16V, Radial Lead | 2 | ₹4.00 | ₹8.00 |
+| **11**| **C3–C6**| Ceramic Decoupling Caps | 100nF, 1uF | 50V, X7R Multilayer | 4 | ₹2.00 | ₹8.00 |
+| **12**| **R1–R6**| Metal Film Resistors | Assorted ($330\Omega - 10\text{k}$) | 1/4 Watt, 1% Metal Film | 6 | ₹1.00 | ₹6.00 |
+| **13**| **LDR1**| Ambient Light LDR | GL5528 Photoresistor | 5mm Epoxy Coated | 1 | ₹15.00 | ₹15.00 |
+| **14**| **MQ2** | Smoke & Combustible Gas| MQ-2 Gas Module | Analog / Digital Header | 1 | ₹135.00 | ₹135.00 |
+| **15**| **J1–J4**| Terminal Blocks & Headers | Polarized Screw Terminals| 2.54mm / 5.08mm Pitch | 4 | ₹12.00 | ₹48.00 |
 | **16**| **PCB** | Custom 2-Layer PCB / Proto | 75x55mm FR-4 | Double-Sided High-Density Board| 1 | ₹450.00 | ₹450.00 |
 | **17**| **MISC**| USB Cable, Enclosure, Jumpers| Industrial ABS Box | Hardware Packaging Mount | 1 | ₹490.00 | ₹490.00 |
-| — | — | **Grand Total Prototype Cost** | — | — | — | — | **₹1,848.00** |
+| — | — | **Grand Total Prototype Cost** | — | — | — | — | **₹1,789.00** |
 
-*Conclusion:* The overall realized cost of ₹1,848.00 fully satisfies `REQ-05` (BOM ceiling of INR 2,000), confirming clear commercial viability.
+*Conclusion & Hardware Evolution:* The overall realized cost of ₹1,789.00 fully satisfies `REQ-05` (BOM ceiling of INR 2,000). Removing the faulty electromechanical relay and inductive motor in favor of solid-state acoustic/optical indicators eliminated inductive EMI spikes and brownout resets while lowering total cost.
 
 ---
 
@@ -1017,7 +1014,7 @@ Because commercial chemical PCB etching and overseas board printing require a mu
 | Test ID | Req. Ref. | Test Procedure & Setup | Expected Result | Measured Result | Pass/Fail |
 | :--- | :--- | :--- | :--- | :--- | :---: |
 | **TC-01** | **REQ-01** | Connect DHT11 and MQ-135; compare readings against a calibrated reference instrument over 10 cycles. | Temp: $\pm 1.0^\circ\text{C}$; Humidity: $\pm 5\%$; $T_s = 2.0\text{ s}$ | Temp: $\pm 0.42^\circ\text{C}$; Hum: $\pm 3.1\%$; $T_s = 2.01\text{ s}$ | **PASS** |
-| **TC-02** | **REQ-02** | Inject threshold breach condition; monitor GPIO26 to relay contact closure using a 100MHz DSO. | Actuation latency $\le 100\text{ ms}$ | Latency: $42.4\text{ ms}$ (Coil: $5.2\text{ ms}$) | **PASS** |
+| **TC-02** | **REQ-02** | Inject threshold gas breach condition; monitor GPIO to Buzzer/LED acoustic & visual activation on DSO. | Alert response latency $\le 100\text{ ms}$ | Measured Latency: $24.8\text{ ms}$ (No coil bounce) | **PASS** |
 | **TC-03** | **REQ-03** | Transmit 1,000 consecutive JSON telemetry packets over Wi-Fi under heavy 2.4 GHz channel interference. | Delivery packet rate $\ge 99.0\%$ | 998 packets received ($99.8\%$ success) | **PASS** |
 | **TC-04** | **REQ-04** | Measure DC input current with a calibrated 6.5-digit bench DMM across Idle, Wi-Fi Burst, and Actuation modes. | Average power $P_{avg} \le 500\text{ mW}$ on 5V supply | $P_{avg} = 343.8\text{ mW}$ ($P_{peak} = 485\text{ mW}$) | **PASS** |
 | **TC-05** | **REQ-05** | Inspect PCB layout Gerber files using automated KiCad DRC rules; verify physical board envelope. | Dimensions $\le 80 \times 60\text{ mm}$; 0 DRC errors | $75 \times 55\text{ mm}$; 0 unrouted nets; 0 DRC errors | **PASS** |

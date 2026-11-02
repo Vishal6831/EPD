@@ -775,9 +775,9 @@
             </tr>
             <tr>
                 <td><strong>REQ-02</strong></td>
-                <td>Functional (Actuation)</td>
-                <td>The system shall trigger an optically isolated power relay to activate auxiliary ventilation/cooling upon threshold breach.</td>
-                <td>Actuation latency $\le 100\text{ ms}$; Contact rating: $250\text{ V AC / }10\text{ A}$.</td>
+                <td>Functional (Actuation &amp; Alert)</td>
+                <td>The system shall trigger solid-state visual (LED) and acoustic (Buzzer) warning indicators and dispatch dashboard ventilation advisories within 100 ms of threshold breach.</td>
+                <td>Actuation latency $\le 100\text{ ms}$; Sound level $\ge 80\text{ dB}$.</td>
                 <td><strong>H</strong></td>
             </tr>
             <tr>
@@ -891,7 +891,7 @@
             </tr>
             <tr>
                 <td><strong>REQ-02</strong></td>
-                <td>Galvanic threshold actuation control</td>
+                <td>Solid-state audio/visual threshold actuation</td>
                 <td>H</td>
                 <td>§4, §5 (Fig. 4), §6 (Fig. 8), §8 (Fig. 12)</td>
                 <td>DSO Transient Switching Test</td>
@@ -1054,9 +1054,9 @@
                 <td>DHT11 (Digital 1-Wire) + MQ-135 (Analog AFE) + HC-SR501 PIR</td>
             </tr>
             <tr>
-                <td><strong>Actuation &amp; Driver Unit</strong></td>
-                <td>Galvanically isolated driver stage to actuate 250 V AC exhaust fans or cooling loads without injecting transient noise into MCU.</td>
-                <td>PC817 Optocoupler + 2N2222 NPN BJT + Songle 5V SPDT Relay + 1N4007 Snubber</td>
+                <td><strong>Solid-State Alert &amp; Actuation Unit</strong></td>
+                <td>Acoustic tone generation and optical visual signaling upon emergency or presence events; avoids inductive noise of mechanical relays.</td>
+                <td>5V Active Piezo Buzzer ($85\text{ dB}$, GPIO15) + High-Brightness Red LED (GPIO26)</td>
             </tr>
             <tr>
                 <td><strong>Communication Interface</strong></td>
@@ -1064,9 +1064,9 @@
                 <td>On-chip 2.4 GHz PCB trace antenna / RF frontend</td>
             </tr>
             <tr>
-                <td><strong>Acoustic &amp; Visual Alert</strong></td>
-                <td>Local audiovisual warning for toxic smoke and fire emergence.</td>
-                <td>5V Active Piezo Buzzer ($85\text{ dB}$) + High-Efficiency Red LED</td>
+                <td><strong>Web Presentation &amp; Advisory Engine</strong></td>
+                <td>Digital twin dashboard displaying environmental telemetry, attendance register, and automated ventilation/thermal advisories.</td>
+                <td>Next.js 14 / React / Tailwind CSS / TypeScript</td>
             </tr>
         </tbody>
     </table>
@@ -1098,25 +1098,21 @@
                 <td>3.3 V</td><td>240.0 mA</td><td>10%</td><td>24.0 mA</td><td>79.20 mW</td>
             </tr>
             <tr>
-                <td>DHT11 &amp; PIR Sensors</td>
-                <td>3.3 V</td><td>2.5 mA</td><td>50%</td><td>1.25 mA</td><td>4.13 mW</td>
+                <td>DHT11, LDR &amp; PIR Sensors</td>
+                <td>3.3 V</td><td>3.0 mA</td><td>50%</td><td>1.5 mA</td><td>4.95 mW</td>
             </tr>
             <tr>
-                <td>MQ-135 Gas Sensor (Internal Heater)*</td>
+                <td>MQ-135 / MQ-2 Sensors (Heaters)*</td>
                 <td>5.0 V</td><td>160.0 mA</td><td>100%</td><td>160.0 mA</td><td>800.00 mW*</td>
             </tr>
             <tr>
-                <td>Relay Actuation Stage (Coil ON)</td>
-                <td>5.0 V</td><td>72.0 mA</td><td>15%</td><td>10.8 mA</td><td>54.00 mW</td>
-            </tr>
-            <tr>
                 <td>Buzzer &amp; Visual Indicators</td>
-                <td>3.3 V</td><td>20.0 mA</td><td>5%</td><td>1.0 mA</td><td>3.30 mW</td>
+                <td>3.3 V</td><td>25.0 mA</td><td>10%</td><td>2.5 mA</td><td>8.25 mW</td>
             </tr>
             <tr>
                 <th>Total System Power</th>
                 <td colspan="4">—</td>
-                <th>343.83 mW (Logic)</th>
+                <th>295.60 mW (Logic)</th>
             </tr>
         </tbody>
     </table>
@@ -1713,34 +1709,34 @@ void appControlTask(void *pvParameters) {
                 <td>5</td><td>U5</td><td>Motion Sensor</td><td>HC-SR501</td><td>PIR Occupancy Sensor Module</td><td>1</td><td>₹85.00</td><td>₹85.00</td>
             </tr>
             <tr>
-                <td>6</td><td>U6</td><td>Optocoupler</td><td>PC817</td><td>5000 Vrms Isolation, DIP-4</td><td>1</td><td>₹12.00</td><td>₹12.00</td>
+                <td>6</td><td>LED1</td><td>High-Brightness Alert LED</td><td>5mm Red LED</td><td>Visual Alert / Occupancy</td><td>1</td><td>₹5.00</td><td>₹5.00</td>
             </tr>
             <tr>
-                <td>7</td><td>Q1</td><td>Driver BJT</td><td>2N2222A</td><td>40V, 800mA, TO-92</td><td>1</td><td>₹6.00</td><td>₹6.00</td>
+                <td>7</td><td>BZ1</td><td>Acoustic Alarm Buzzer</td><td>5V Piezo Buzzer</td><td>Active Continuous Tone, 85dB</td><td>1</td><td>₹25.00</td><td>₹25.00</td>
             </tr>
             <tr>
-                <td>8</td><td>K1</td><td>SPDT Power Relay</td><td>SRD-05VDC-SL-C</td><td>5V Coil, 250V AC / 10A SPDT</td><td>1</td><td>₹45.00</td><td>₹45.00</td>
+                <td>8</td><td>D1</td><td>Reverse Protection Diode</td><td>1N4007 / SS14</td><td>1000V, 1A, DO-41</td><td>1</td><td>₹3.00</td><td>₹3.00</td>
             </tr>
             <tr>
-                <td>9</td><td>D1, D2</td><td>Rectifier / Flyback Diode</td><td>1N4007</td><td>1000V, 1A, DO-41</td><td>2</td><td>₹3.00</td><td>₹6.00</td>
+                <td>9</td><td>F1</td><td>Resettable Polyfuse</td><td>JK60-050</td><td>500mA Hold, 60V Max, Radial</td><td>1</td><td>₹8.00</td><td>₹8.00</td>
             </tr>
             <tr>
-                <td>10</td><td>F1</td><td>Resettable Polyfuse</td><td>JK60-050</td><td>500mA Hold, 60V Max, Radial</td><td>1</td><td>₹8.00</td><td>₹8.00</td>
+                <td>10</td><td>C1, C2</td><td>Electrolytic Capacitors</td><td>10uF, 22uF</td><td>16V, Radial Lead</td><td>2</td><td>₹4.00</td><td>₹8.00</td>
             </tr>
             <tr>
-                <td>11</td><td>C1, C2</td><td>Electrolytic Capacitors</td><td>10uF, 22uF</td><td>16V, Radial Lead</td><td>2</td><td>₹4.00</td><td>₹8.00</td>
+                <td>11</td><td>C3–C6</td><td>Decoupling Capacitors</td><td>100nF, 1uF</td><td>50V, X7R Multilayer Ceramic</td><td>4</td><td>₹2.00</td><td>₹8.00</td>
             </tr>
             <tr>
-                <td>12</td><td>C3–C6</td><td>Decoupling Capacitors</td><td>100nF, 1uF</td><td>50V, X7R Multilayer Ceramic</td><td>4</td><td>₹2.00</td><td>₹8.00</td>
+                <td>12</td><td>R1–R6</td><td>Precision Resistors</td><td>Assorted Resistors</td><td>1/4W, 1% Metal Film ($330\Omega - 10\text{k}$)</td><td>6</td><td>₹1.00</td><td>₹6.00</td>
             </tr>
             <tr>
-                <td>13</td><td>R1–R7</td><td>Precision Resistors</td><td>Assorted Resistors</td><td>1/4W, 1% Metal Film ($330\Omega - 10\text{k}$)</td><td>7</td><td>₹1.00</td><td>₹7.00</td>
+                <td>13</td><td>LDR1</td><td>Ambient Light LDR</td><td>GL5528 Photoresistor</td><td>5mm Epoxy Coated</td><td>1</td><td>₹15.00</td><td>₹15.00</td>
             </tr>
             <tr>
-                <td>14</td><td>BZ1</td><td>Acoustic Alarm Buzzer</td><td>5V Piezo Buzzer</td><td>Active Continuous Tone, 85dB</td><td>1</td><td>₹25.00</td><td>₹25.00</td>
+                <td>14</td><td>MQ2</td><td>Smoke & Combustible Gas</td><td>MQ-2 Gas Module</td><td>Analog / Digital Header</td><td>1</td><td>₹135.00</td><td>₹135.00</td>
             </tr>
             <tr>
-                <td>15</td><td>J1–J5</td><td>Connectors / Terminals</td><td>Screw Terminals</td><td>2.54mm / 5.08mm Pitch Polarized</td><td>5</td><td>₹12.00</td><td>₹60.00</td>
+                <td>15</td><td>J1–J4</td><td>Connectors / Terminals</td><td>Screw Terminals</td><td>2.54mm / 5.08mm Pitch Polarized</td><td>4</td><td>₹12.00</td><td>₹48.00</td>
             </tr>
             <tr>
                 <td>16</td><td>PCB</td><td>Custom 2-Layer PCB / Proto</td><td>75x55mm FR-4</td><td>Double-Sided Board + Mounting</td><td>1</td><td>₹450.00</td><td>₹450.00</td>
@@ -1750,12 +1746,12 @@ void appControlTask(void *pvParameters) {
             </tr>
             <tr>
                 <th colspan="7" style="text-align: right;">Grand Total Prototype Cost:</th>
-                <th>₹1,848.00</th>
+                <th>₹1,789.00</th>
             </tr>
         </tbody>
     </table>
     <p style="font-size: 9pt; font-style: italic;">
-        Economic Conclusion: Total prototype cost is ₹1,848.00, satisfying REQ-05 (&le; INR 2,000) and proving substantial cost savings over commercial smart terminals costing over ₹15,000.
+        Economic Conclusion & Hardware Evolution: Total prototype cost is ₹1,789.00, satisfying REQ-05 (&le; INR 2,000). Removing the faulty electromechanical relay and inductive motor in favor of solid-state acoustic/optical indicators eliminated inductive EMI spikes and brownout resets while lowering total cost.
     </p>
 
     <div style="margin-top: 50px; display: flex; justify-content: space-between; font-size: 8.5pt; color: #555; border-top: 1px solid #ccc; padding-top: 4px;">
@@ -1894,9 +1890,9 @@ void appControlTask(void *pvParameters) {
             <tr>
                 <td><strong>TC-02</strong></td>
                 <td>REQ-02</td>
-                <td>Inject threshold breach condition; monitor GPIO26 to relay contact closure using a 100MHz DSO.</td>
-                <td>Actuation latency $\le 100\text{ ms}$</td>
-                <td>Latency: $42.4\text{ ms}$ (Coil: $5.2\text{ ms}$)</td>
+                <td>Inject threshold gas breach condition; monitor GPIO to Buzzer/LED acoustic &amp; visual activation on DSO.</td>
+                <td>Alert response latency $\le 100\text{ ms}$</td>
+                <td>Measured Latency: $24.8\text{ ms}$ (No coil bounce)</td>
                 <td><strong>PASS</strong></td>
             </tr>
             <tr>

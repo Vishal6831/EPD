@@ -148,8 +148,8 @@ class SimulationService {
     if (data.temperature > 28) {
       events.push({
         id: Math.random().toString(),
-        action: 'AC ON',
-        reason: 'Temperature above threshold',
+        action: 'Cooling Advisory',
+        reason: 'Temperature above 28°C threshold',
         timestamp: new Date().toISOString(),
         mode: 'AUTO'
       });

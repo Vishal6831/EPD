@@ -65,8 +65,8 @@ export default function AutomationPage() {
               </div>
               <div className="flex justify-between items-start border-b border-slate-800 pb-3">
                 <div>
-                  <div className="font-medium">AC Control</div>
-                  <div className="text-slate-400 mt-1">Temp &gt; 28°C → AC ON</div>
+                  <div className="font-medium">Thermal Advisory</div>
+                  <div className="text-slate-400 mt-1">Temp &gt; 28°C → Cooling Alert</div>
                 </div>
                 <Badge variant="success">ACTIVE</Badge>
               </div>
